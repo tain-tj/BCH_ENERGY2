@@ -2,79 +2,219 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Electricity Dashboard</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .header-title {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .card {
+            border: none;
+            border-radius: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi-card {
+            border-left: 5px solid #0d6efd;
+        }
+        .kpi-title {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .form-select {
+            border-radius: 10px;
+            padding: 10px 15px;
+        }
+        .btn-outline-secondary {
+            border-radius: 10px;
+            padding: 10px 20px;
+        }
+        .trend-box {
+            background-color: #e0f2fe;
+            border-left: 5px solid #0ea5e9;
+            border-radius: 10px;
+        }
+        /* ปรับสไตล์กราฟให้แสดงผลดีในมือถือ */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        @media (max-width: 768px) {
+            .kpi-value {
+                font-size: 1.4rem;
+            }
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
 </head>
 <body class="bg-light">
-<div class="container mt-4">
-    <h2>Dashboard สถิติค่าไฟฟ้า</h2>
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <select class="form-select" id="filterLocation" onchange="updateDashboard()">
-                <option value="ALL">รวมทุกสถานที่</option>
-                <option value="อาคารบรัดเลย์+Welles">อาคารบรัดเลย์+Welles</option>
-                <option value="หอพัก 9 ชั้น">หอพัก 9 ชั้น</option>
-                <option value="อาคาร CCT">อาคาร CCT</option>
-                <option value="บ้านทุ่ง 24/1">บ้านทุ่ง 24/1</option>
-                <option value="บ้านทุ่ง 24/2">บ้านทุ่ง 24/2</option>
-                <option value="2/1 ซอยสว่าง 2">2/1 ซอยสว่าง 2</option>
-                <option value="2 ซอยสว่าง 2">2 ซอยสว่าง 2</option>
-            </select>
+
+<div class="container mt-3 mb-5 px-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="header-title mb-1"><i class="fa-solid fa-chart-line text-primary me-2"></i>Dashboard สถิติค่าไฟฟ้า</h2>
+            <p class="text-secondary mb-0 small">เริ่มต้นปีงบประมาณที่เดือนพฤษภาคม (FY May Cycle)</p>
         </div>
-        <div class="col-md-4">
-            <select class="form-select" id="filterYear" onchange="updateDashboard()">
+        <a href="index.html" class="btn btn-outline-secondary w-100 w-md-auto shadow-sm">
+            <i class="fa-solid fa-chevron-left me-2"></i>กลับไปหน้าบันทึก
+        </a>
+    </div>
+
+    <div class="card p-3 shadow-sm mb-4">
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label class="form-label fw-medium text-secondary small">📍 เลือกสถานที่</label>
+                <select class="form-select" id="filterLocation" onchange="updateDashboard()">
+                    <option value="ALL">รวมทุกสถานที่</option>
+                    <option value="อาคารบรัดเลย์+Welles">อาคารบรัดเลย์+Welles</option>
+                    <option value="หอพัก 9 ชั้น">หอพัก 9 ชั้น</option>
+                    <option value="อาคาร CCT">อาคาร CCT</option>
+                    <option value="บ้านทุ่ง 24/1">บ้านทุ่ง 24/1</option>
+                    <option value="บ้านทุ่ง 24/2">บ้านทุ่ง 24/2</option>
+                    <option value="2/1 ซอยสว่าง 2">2/1 ซอยสว่าง 2</option>
+                    <option value="2 ซอยสว่าง 2">2 ซอยสว่าง 2</option>
                 </select>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="index.html" class="btn btn-outline-secondary">กลับไปหน้าบันทึก</a>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="form-label fw-medium text-secondary small">📅 เลือกปีงบประมาณ (ค.ศ.)</label>
+                <select class="form-select" id="filterYear" onchange="updateDashboard()">
+                    </select>
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card p-3 shadow-sm">
-                <canvas id="amountChart"></canvas>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card p-3 shadow-sm kpi-card" style="border-left-color: #0d6efd;">
+                <div class="kpi-title"><i class="fa-solid fa-wallet text-primary me-2"></i>ยอดเงินรวมปีนี้</div>
+                <div class="kpi-value mt-1" id="kpiAmount">0.00 <span class="fs-6 fw-normal text-secondary">บาท</span></div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card p-3 shadow-sm">
-                <canvas id="unitChart"></canvas>
+        <div class="col-12 col-md-4">
+            <div class="card p-3 shadow-sm kpi-card" style="border-left-color: #198754;">
+                <div class="kpi-title"><i class="fa-solid fa-bolt text-success me-2"></i>ยอดหน่วยไฟรวมปีนี้</div>
+                <div class="kpi-value mt-1" id="kpiUnit">0.00 <span class="fs-6 fw-normal text-secondary">kWh</span></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card p-3 shadow-sm kpi-card" style="border-left-color: #fd7e14;">
+                <div class="kpi-title"><i class="fa-solid fa-calculator text-warning me-2"></i>อัตราเฉลี่ยต่อหน่วย</div>
+                <div class="kpi-value mt-1" id="kpiAvgCost">0.00 <span class="fs-6 fw-normal text-secondary">บาท/หน่วย</span></div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-12 mb-4">
+
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
             <div class="card p-3 shadow-sm">
-                <canvas id="compareChart"></canvas>
+                <h5 class="fw-semibold mb-3 fs-6 text-secondary"><i class="fa-solid fa-chart-bar text-primary me-2"></i>ยอดค่าใช้ไฟฟ้าต่อเดือน (บาท)</h5>
+                <div class="chart-container">
+                    <canvas id="amountChart"></canvas>
+                </div>
             </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-semibold mb-3 fs-6 text-secondary"><i class="fa-solid fa-chart-simple text-success me-2"></i>ยอดหน่วยใช้ไฟฟ้าต่อเดือน (kWh)</h5>
+                <div class="chart-container">
+                    <canvas id="unitChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-semibold mb-3 fs-6 text-secondary"><i class="fa-solid fa-code-compare text-danger me-2"></i>กราฟเส้นเปรียบเทียบยอดรวมค่าไฟ (ปีที่แล้ว vs ปีนี้)</h5>
+                <div class="chart-container" style="height: 320px;">
+                    <canvas id="compareChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 shadow-sm trend-box">
+        <h5 class="fw-semibold mb-2 text-dark"><i class="fa-solid fa-magnifying-glass-chart text-info me-2"></i>บทวิเคราะห์และแนวโน้มค่าไฟฟ้า (Analytics Summary)</h5>
+        <div id="trendAnalysisContent" class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+            กำลังประมวลผลแนวโน้มจากข้อมูล...
         </div>
     </div>
 </div>
 
 <script>
-    // ** เปลี่ยน URL ตรงนี้เป็น URL ของ Web App **
+    // ใช้ URL Web App ของคุณที่ระบบเชื่อมกับ Google Sheets ไว้แล้ว
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqWI4F3NnGC2Bwg2tQ1SB-KDrpIMIg45jiQb2E64zDqQEHQqr4LXaQA6gymNF4ZEhw/exec';
     let rawData = [];
     let charts = {};
     
-    // เรียงเดือนตามปีงบประมาณ เริ่ม พ.ค. (พฤษภาคม = 5)
     const fiscalMonths = [5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4];
     const monthLabels = ['พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.'];
 
     async function loadData() {
-        const response = await fetch(SCRIPT_URL);
-        rawData = await response.json();
-        
-        // Populate Year Dropdown based on data
-        const years = [...new Set(rawData.map(d => getFiscalYear(d.Month, d.Year)))].sort().reverse();
-        const yearSelect = document.getElementById('filterYear');
-        years.forEach(y => {
-            yearSelect.innerHTML += `<option value="${y}">ปีงบประมาณ ${y}</option>`;
+        // 1. เรียกใช้งาน SweetAlert โหลดข้อมูลในตอนแรก
+        Swal.fire({
+            title: 'กำลังดาวน์โหลดข้อมูล...',
+            html: 'กรุณารอสักครู่ ระบบกำลังดึงฐานข้อมูลค่าไฟฟ้าล่าสุด',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
         });
-        
-        updateDashboard();
+
+        try {
+            const response = await fetch(SCRIPT_URL);
+            rawData = await response.json();
+            
+            // ปิดกล่องข้อความโหลด
+            Swal.close();
+
+            const years = [...new Set(rawData.map(d => getFiscalYear(d.Month, d.Year)))].sort().reverse();
+            const yearSelect = document.getElementById('filterYear');
+            yearSelect.innerHTML = '';
+            
+            if(years.length === 0) {
+                // เผื่อกรณีไม่มีข้อมูลในชีตเลย
+                const currentYear = new Date().getFullYear();
+                yearSelect.innerHTML += `<option value="${currentYear}">ปีงบประมาณ ${currentYear}</option>`;
+            } else {
+                years.forEach(y => {
+                    yearSelect.innerHTML += `<option value="${y}">ปีงบประมาณ ${y}</option>`;
+                });
+            }
+            
+            updateDashboard();
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'โหลดข้อมูลล้มเหลว',
+                text: 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ โปรดรีเฟรชหน้าจออีกครั้ง',
+                confirmButtonText: 'โหลดใหม่',
+                confirmButtonColor: '#0d6efd'
+            }).then(() => { location.reload(); });
+        }
     }
 
     function getFiscalYear(month, year) {
@@ -90,15 +230,14 @@
             filtered = filtered.filter(d => d.Location === location);
         }
 
-        // จัดเตรียมข้อมูลสำหรับกราฟ
         let amountData = new Array(12).fill(0);
         let unitData = new Array(12).fill(0);
         let compareDataThisYear = new Array(12).fill(0);
         let compareDataLastYear = new Array(12).fill(0);
         
-        // ข้อมูลเฉลี่ยค่าไฟต่อหน่วย
-        let costPerUnitData = new Array(12).fill(0);
-        let countPerMonth = new Array(12).fill(0);
+        let totalAmountThisYear = 0;
+        let totalUnitThisYear = 0;
+        let totalAmountLastYear = 0;
 
         filtered.forEach(d => {
             const fYear = getFiscalYear(d.Month, d.Year);
@@ -106,34 +245,70 @@
             
             if (monthIndex !== -1) {
                 if (fYear === targetYear) {
-                    amountData[monthIndex] += d.Amount;
-                    unitData[monthIndex] += d.Units;
-                    compareDataThisYear[monthIndex] += d.Amount;
+                    amountData[monthIndex] += parseFloat(d.Amount || 0);
+                    unitData[monthIndex] += parseFloat(d.Units || 0);
+                    compareDataThisYear[monthIndex] += parseFloat(d.Amount || 0);
                     
-                    costPerUnitData[monthIndex] += d.CostPerUnit;
-                    countPerMonth[monthIndex]++;
+                    totalAmountThisYear += parseFloat(d.Amount || 0);
+                    totalUnitThisYear += parseFloat(d.Units || 0);
                 } else if (fYear === targetYear - 1) {
-                    compareDataLastYear[monthIndex] += d.Amount;
+                    compareDataLastYear[monthIndex] += parseFloat(d.Amount || 0);
+                    totalAmountLastYear += parseFloat(d.Amount || 0);
                 }
             }
         });
 
-        // คำนวณค่าไฟเฉลี่ยต่อหน่วย เพื่อแสดงเป็น Label ทับบนกราฟ (ถ้าต้องการ)
-        const avgCostPerUnit = costPerUnitData.map((total, i) => countPerMonth[i] > 0 ? (total / countPerMonth[i]).toFixed(2) : 0);
+        // อัปเดตข้อมูลบน KPI Cards หน้าเว็บ
+        document.getElementById('kpiAmount').innerHTML = `${totalAmountThisYear.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} <span class="fs-6 fw-normal text-secondary">บาท</span>`;
+        document.getElementById('kpiUnit').innerHTML = `${totalUnitThisYear.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} <span class="fs-6 fw-normal text-secondary">kWh</span>`;
+        
+        const avgCost = totalUnitThisYear > 0 ? (totalAmountThisYear / totalUnitThisYear).toFixed(2) : '0.00';
+        document.getElementById('kpiAvgCost').innerHTML = `${avgCost} <span class="fs-6 fw-normal text-secondary">บาท/หน่วย</span>`;
 
-        renderChart('amountChart', 'bar', 'ยอดค่าไฟฟ้า (บาท)', monthLabels, amountData, '#0d6efd');
-        renderChart('unitChart', 'bar', 'ยอดหน่วยไฟฟ้า (kWh)', monthLabels, unitData, '#198754');
+        // คำนวณค่าไฟฟ้าแต่ละเดือนหน่วยละกี่บาท เพื่อใส่เป็น Tooltip ในกราฟ
+        const monthlyRates = amountData.map((amt, idx) => unitData[idx] > 0 ? (amt / unitData[idx]).toFixed(2) : '0.00');
+
+        // วาดกราฟต่างๆ
+        renderChart('amountChart', 'bar', 'ยอดเงิน (บาท)', monthLabels, amountData, '#0d6efd', monthlyRates, 'บาท');
+        renderChart('unitChart', 'bar', 'หน่วยไฟ (kWh)', monthLabels, unitData, '#198754', monthlyRates, 'kWh');
         renderCompareChart('compareChart', monthLabels, compareDataThisYear, compareDataLastYear, targetYear);
+        
+        // ประมวลผลบทวิเคราะห์แนวโน้มอัตโนมัติ
+        generateTrendAnalysis(totalAmountThisYear, totalAmountLastYear, targetYear, location, avgCost);
     }
 
-    function renderChart(canvasId, type, label, labels, data, color) {
+    function renderChart(canvasId, type, label, labels, data, color, monthlyRates, unitSuffix) {
         if (charts[canvasId]) charts[canvasId].destroy();
         const ctx = document.getElementById(canvasId).getContext('2d');
+        
         charts[canvasId] = new Chart(ctx, {
             type: type,
             data: {
                 labels: labels,
-                datasets: [{ label: label, data: data, backgroundColor: color }]
+                datasets: [{ 
+                    label: label, 
+                    data: data, 
+                    backgroundColor: color,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let index = context.dataIndex;
+                                let value = context.raw.toLocaleString('th-TH');
+                                return [
+                                    `${context.dataset.label}: ${value} ${unitSuffix}`,
+                                    ` อัตราเฉลี่ย: ${monthlyRates[index]} บาท/หน่วย`
+                                ];
+                            }
+                        }
+                    }
+                }
             }
         });
     }
@@ -141,16 +316,61 @@
     function renderCompareChart(canvasId, labels, currentYearData, lastYearData, year) {
         if (charts[canvasId]) charts[canvasId].destroy();
         const ctx = document.getElementById(canvasId).getContext('2d');
+        
         charts[canvasId] = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [
-                    { label: `ปี ${year}`, data: currentYearData, borderColor: '#0d6efd', fill: false, tension: 0.1 },
-                    { label: `ปี ${year-1}`, data: lastYearData, borderColor: '#dc3545', fill: false, tension: 0.1, borderDash: [5, 5] }
+                    { label: `ปีงบฯ ${year} (ปีนี้)`, data: currentYearData, borderColor: '#0d6efd', backgroundColor: '#0d6efd', fill: false, tension: 0.2, borderWidth: 3 },
+                    { label: `ปีงบฯ ${year-1} (ปีที่แล้ว)`, data: lastYearData, borderColor: '#dc3545', backgroundColor: '#dc3545', fill: false, tension: 0.2, borderDash: [5, 5], borderWidth: 2 }
                 ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.dataset.label}: ${context.raw.toLocaleString('th-TH')} บาท`;
+                            }
+                        }
+                    }
+                }
             }
         });
+    }
+
+    // ฟังก์ชันช่วยคิดและวิเคราะห์แนวโน้มค่าไฟฟ้าอัตโนมัติ
+    function generateTrendAnalysis(thisYearAmt, lastYearAmt, year, location, avgCost) {
+        const contentDiv = document.getElementById('trendAnalysisContent');
+        const locName = location === 'ALL' ? 'ภาพรวมทุกสถานที่' : location;
+        
+        if (thisYearAmt === 0) {
+            contentDiv.innerHTML = `📌 <b>ผลวิเคราะห์ฐานข้อมูล:</b> ไม่พบข้อมูลการบันทึกค่าไฟฟ้าของปีงบประมาณ ${year} ในระบบในขณะนี้ โปรดตรวจสอบการกรอกข้อมูลในหน้าบันทึก`;
+            return;
+        }
+
+        let diffText = "";
+        if (lastYearAmt > 0) {
+            const percentDiff = (((thisYearAmt - lastYearAmt) / lastYearAmt) * 100).toFixed(1);
+            if (percentDiff > 0) {
+                diffText = `มีอัตราการใช้จ่ายค่าไฟฟ้า <b>เพิ่มขึ้นสูงกว่าปีที่แล้ว +${percentDiff}%</b>`;
+            } else if (percentDiff < 0) {
+                diffText = `มีประสิทธิภาพการประหยัดพลังงานที่ดีขึ้น โดยค่าใช้จ่าย <b>ลดลงจากปีที่แล้ว ${Math.abs(percentDiff)}%</b>`;
+            } else {
+                diffText = `มีอัตราปริมาณการใช้จ่ายไฟใกล้เคียงคงที่เท่ากับปีงบประมาณที่ผ่านมา`;
+            }
+        } else {
+            diffText = `ระบบยังไม่มีฐานข้อมูลของปีงบประมาณก่อนหน้า (${year-1}) มาทำการคำนวณเปรียบเทียบเชิงสถิติ (YoY)`;
+        }
+
+        contentDiv.innerHTML = `
+            <p class="mb-2">📊 สำหรับ <b>${locName}</b> ในปีงบประมาณ ${year} มีอัตราค่าไฟเฉลี่ยรวมอยู่ที่ <b>${avgCost} บาทต่อหน่วย</b></p>
+            <p class="mb-0">💡 <b>แนวโน้มเชิงลึก (Trend Insight):</b> เมื่อเทียบช่วงเวลาวงจรเปิดปิดไฟ (Fiscal Cycle) พบว่าค่าใช้จ่ายรวมย้อนหลัง ${diffText}. 
+            แนะนำให้สังเกตจุดยอดกราฟ (Peak Period) บนกราฟเส้น หากพบการกระโดดของเส้นปีนี้ในบางเดือนอย่างผิดปกติ ควรตรวจสอบระบบปรับอากาศหรือเวลาเปิด-ปิดไฟของอาคารนั้นเพื่อลดต้นทุนพลังงานสะสม</p>
+        `;
     }
 
     window.onload = loadData;
